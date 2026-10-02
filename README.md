@@ -86,7 +86,7 @@ Budget-Variance-Dashboard/
 │   └── dashboard_specification.md
 ├── docs/
 │   ├── data_dictionary.md
-│   └── learning_guide_48h.md
+│   └── study_plan_2days.md
 ├── docker-compose.yml
 ├── Dockerfile
 ├── .dockerignore
@@ -123,5 +123,5 @@ docker-compose up -d
 
 ---
 
-## 48-Hour Learning & Interview Roadmap
-Refer to `docs/learning_guide_48h.md` for a structured breakdown of the star schema design, DAX measures hierarchy, SQL reconciliation queries, and key interview talking points.
+## 2-Day Learning & Study Roadmap
+Refer to `docs/study_plan_2days.md` for a structured breakdown of the star schema design, DAX measures hierarchy, SQL reconciliation queries, and key interview talking points.
