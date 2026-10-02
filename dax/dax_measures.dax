@@ -1,0 +1,270 @@
+Total Actuals = 
+CALCULATE(
+    SUM(fact_financials[amount]),
+    fact_financials[scenario] = "Actual"
+)
+
+Total Budget = 
+CALCULATE(
+    SUM(fact_financials[amount]),
+    fact_financials[scenario] = "Budget"
+)
+
+Actual Revenue = 
+CALCULATE(
+    [Total Actuals],
+    dim_account[statement_section] = "Revenue"
+)
+
+Budget Revenue = 
+CALCULATE(
+    [Total Budget],
+    dim_account[statement_section] = "Revenue"
+)
+
+Actual COGS = 
+CALCULATE(
+    [Total Actuals],
+    dim_account[statement_section] = "COGS"
+)
+
+Budget COGS = 
+CALCULATE(
+    [Total Budget],
+    dim_account[statement_section] = "COGS"
+)
+
+Actual OPEX = 
+CALCULATE(
+    [Total Actuals],
+    dim_account[statement_section] = "OPEX"
+)
+
+Budget OPEX = 
+CALCULATE(
+    [Total Budget],
+    dim_account[statement_section] = "OPEX"
+)
+
+Actual Expenses = [Actual COGS] + [Actual OPEX]
+
+Budget Expenses = [Budget COGS] + [Budget OPEX]
+
+Actual Gross Profit = [Actual Revenue] - [Actual COGS]
+
+Budget Gross Profit = [Budget Revenue] - [Budget COGS]
+
+Actual Net Profit = [Actual Revenue] - [Actual Expenses]
+
+Budget Net Profit = [Budget Revenue] - [Budget Expenses]
+
+Variance ($) = [Total Actuals] - [Total Budget]
+
+Variance (%) = 
+DIVIDE(
+    [Variance ($)],
+    [Total Budget],
+    0
+)
+
+Revenue Variance ($) = [Actual Revenue] - [Budget Revenue]
+
+Revenue Variance (%) = 
+DIVIDE(
+    [Revenue Variance ($)],
+    [Budget Revenue],
+    0
+)
+
+Expense Variance ($) = [Actual Expenses] - [Budget Expenses]
+
+Expense Variance (%) = 
+DIVIDE(
+    [Expense Variance ($)],
+    [Budget Expenses],
+    0
+)
+
+Net Profit Variance ($) = [Actual Net Profit] - [Budget Net Profit]
+
+Net Profit Variance (%) = 
+DIVIDE(
+    [Net Profit Variance ($)],
+    ABS([Budget Net Profit]),
+    0
+)
+
+Is Favorable Variance = 
+VAR Section = SELECTEDVALUE(dim_account[statement_section], "OPEX")
+RETURN
+    IF(
+        Section = "Revenue",
+        IF([Variance ($)] >= 0, 1, 0),
+        IF([Variance ($)] <= 0, 1, 0)
+    )
+
+Variance Impact Label = 
+VAR Section = SELECTEDVALUE(dim_account[statement_section], "OPEX")
+VAR Diff = [Variance ($)]
+RETURN
+    IF(
+        Section = "Revenue",
+        IF(Diff >= 0, "Favorable", "Unfavorable"),
+        IF(Diff <= 0, "Favorable", "Unfavorable")
+    )
+
+Actuals YTD = 
+TOTALYTD(
+    [Total Actuals],
+    dim_date[full_date]
+)
+
+Budget YTD = 
+TOTALYTD(
+    [Total Budget],
+    dim_date[full_date]
+)
+
+Variance YTD ($) = [Actuals YTD] - [Budget YTD]
+
+Variance YTD (%) = 
+DIVIDE(
+    [Variance YTD ($)],
+    [Budget YTD],
+    0
+)
+
+Actual Revenue YTD = 
+TOTALYTD(
+    [Actual Revenue],
+    dim_date[full_date]
+)
+
+Budget Revenue YTD = 
+TOTALYTD(
+    [Budget Revenue],
+    dim_date[full_date]
+)
+
+Revenue Variance YTD ($) = [Actual Revenue YTD] - [Budget Revenue YTD]
+
+Revenue Variance YTD (%) = 
+DIVIDE(
+    [Revenue Variance YTD ($)],
+    [Budget Revenue YTD],
+    0
+)
+
+Actual Expenses YTD = 
+TOTALYTD(
+    [Actual Expenses],
+    dim_date[full_date]
+)
+
+Budget Expenses YTD = 
+TOTALYTD(
+    [Budget Expenses],
+    dim_date[full_date]
+)
+
+Expense Variance YTD ($) = [Actual Expenses YTD] - [Budget Expenses YTD]
+
+Expense Variance YTD (%) = 
+DIVIDE(
+    [Expense Variance YTD ($)],
+    [Budget Expenses YTD],
+    0
+)
+
+Actual Net Profit YTD = [Actual Revenue YTD] - [Actual Expenses YTD]
+
+Budget Net Profit YTD = [Budget Revenue YTD] - [Budget Expenses YTD]
+
+Net Profit Variance YTD ($) = [Actual Net Profit YTD] - [Budget Net Profit YTD]
+
+Net Profit Variance YTD (%) = 
+DIVIDE(
+    [Net Profit Variance YTD ($)],
+    ABS([Budget Net Profit YTD]),
+    0
+)
+
+Actuals Prior Month = 
+CALCULATE(
+    [Total Actuals],
+    DATEADD(dim_date[full_date], -1, MONTH)
+)
+
+Budget Prior Month = 
+CALCULATE(
+    [Total Budget],
+    DATEADD(dim_date[full_date], -1, MONTH)
+)
+
+Actuals MoM ($) = [Total Actuals] - [Actuals Prior Month]
+
+Actuals MoM (%) = 
+DIVIDE(
+    [Actuals MoM ($)],
+    [Actuals Prior Month],
+    0
+)
+
+Actuals SPLY = 
+CALCULATE(
+    [Total Actuals],
+    SAMEPERIODLASTYEAR(dim_date[full_date])
+)
+
+Budget SPLY = 
+CALCULATE(
+    [Total Budget],
+    SAMEPERIODLASTYEAR(dim_date[full_date])
+)
+
+Actuals YoY ($) = [Total Actuals] - [Actuals SPLY]
+
+Actuals YoY (%) = 
+DIVIDE(
+    [Actuals YoY ($)],
+    [Actuals SPLY],
+    0
+)
+
+Flag Review Variance 10% = 
+IF(
+    ABS([Variance (%)]) >= 0.10,
+    1,
+    0
+)
+
+Flag Review Variance 10% Text = 
+IF(
+    ABS([Variance (%)]) >= 0.10,
+    "FLAGGED FOR REVIEW",
+    "NORMAL"
+)
+
+Review Required Summary = 
+IF(
+    ABS([Variance (%)]) >= 0.10,
+    "Variance exceeds threshold of 10% (" & FORMAT([Variance (%)], "+0.0%;-0.0%;0.0%") & ")",
+    "Within acceptable tolerance (" & FORMAT([Variance (%)], "+0.0%;-0.0%;0.0%") & ")"
+)
+
+Variance Status Color = 
+VAR VarPct = [Variance (%)]
+VAR Section = SELECTEDVALUE(dim_account[statement_section], "OPEX")
+RETURN
+    IF(
+        Section = "Revenue",
+        IF(VarPct >= 0.10, "#198754", IF(VarPct <= -0.10, "#DC3545", "#6C757D")),
+        IF(VarPct >= 0.10, "#DC3545", IF(VarPct <= -0.10, "#198754", "#6C757D"))
+    )
+
+KPI Variance Badge Color = 
+IF(
+    ABS([Variance (%)]) >= 0.10,
+    "#D90429",
+    "#2B9348"
+)

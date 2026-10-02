@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget vs. Actual Variance Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dark-theme">
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M3 3v18h18"/>
+                        <path d="m19 9-5 5-4-4-3 3"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2>FinVariance</h2>
+                    <span>Enterprise BI Suite</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="overview" id="btn-tab-overview">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span>Executive Overview</span>
+                </button>
+                <button class="nav-item" data-tab="drilldown" id="btn-tab-drilldown">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    <span>P&L Hierarchy Drill-Down</span>
+                </button>
+                <button class="nav-item" data-tab="ytd-mom" id="btn-tab-ytd">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>YTD & MoM Intelligence</span>
+                </button>
+                <button class="nav-item" data-tab="exceptions" id="btn-tab-exceptions">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <span>Variance Audit (>=10%)</span>
+                    <span class="badge-alert-count" id="nav-alert-count">0</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-filters">
+                <div class="filter-header">
+                    <h4>Global Slicers</h4>
+                    <button id="btn-reset-filters" class="btn-text">Reset</button>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filter-year">Fiscal Year</label>
+                    <select id="filter-year">
+                        <option value="ALL">All Fiscal Years</option>
+                        <option value="2025">FY2025</option>
+                        <option value="2026" selected>FY2026</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-month">Month</label>
+                    <select id="filter-month">
+                        <option value="ALL">All Months</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-division">Division</label>
+                    <select id="filter-division">
+                        <option value="ALL">All Divisions</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-department">Department</label>
+                    <select id="filter-department">
+                        <option value="ALL">All Departments</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="filter-variance-threshold">
+                        <span>Show only >= 10% Variance</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="theme-toggle" id="theme-toggle">
+                    <span id="theme-label">Dark Mode</span>
+                    <button class="toggle-switch" aria-label="Toggle Theme"></button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-titles">
+                    <h1 id="page-title">Executive P&L Variance Overview</h1>
+                    <p id="page-subtitle">MySQL Star Schema Real-Time Financial Aggregation</p>
+                </div>
+                <div class="header-actions">
+                    <span class="data-status-chip">
+                        <span class="pulse-dot"></span> Star Schema Online
+                    </span>
+                    <button class="btn-secondary" id="btn-export-csv">Export View Data</button>
+                </div>
+            </header>
+
+            <section class="kpi-grid">
+                <div class="kpi-card" id="kpi-revenue">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Total Revenue</span>
+                        <div class="kpi-icon revenue-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value" id="kpi-act-revenue">$0</div>
+                        <div class="kpi-subtext">Budget: <span id="kpi-bud-revenue">$0</span></div>
+                    </div>
+                    <div class="kpi-footer">
+                        <span class="variance-badge" id="kpi-var-rev-badge">+0.0%</span>
+                        <span class="variance-sub" id="kpi-var-rev-diff">$0</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card" id="kpi-expenses">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Total Expenses (COGS+OPEX)</span>
+                        <div class="kpi-icon expense-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        </div>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value" id="kpi-act-expense">$0</div>
+                        <div class="kpi-subtext">Budget: <span id="kpi-bud-expense">$0</span></div>
+                    </div>
+                    <div class="kpi-footer">
+                        <span class="variance-badge" id="kpi-var-exp-badge">+0.0%</span>
+                        <span class="variance-sub" id="kpi-var-exp-diff">$0</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card" id="kpi-profit">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Net Operating Profit</span>
+                        <div class="kpi-icon profit-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                        </div>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value" id="kpi-act-profit">$0</div>
+                        <div class="kpi-subtext">Budget: <span id="kpi-bud-profit">$0</span></div>
+                    </div>
+                    <div class="kpi-footer">
+                        <span class="variance-badge" id="kpi-var-profit-badge">+0.0%</span>
+                        <span class="variance-sub" id="kpi-var-profit-diff">$0</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card alert-card" id="kpi-alerts">
+                    <div class="kpi-header">
+                        <span class="kpi-title">Variance Review Items</span>
+                        <div class="kpi-icon alert-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-value" id="kpi-alert-count">0</div>
+                        <div class="kpi-subtext">Threshold: <strong>&plusmn;10%</strong></div>
+                    </div>
+                    <div class="kpi-footer">
+                        <span class="variance-badge alert-flag" id="kpi-alert-status">Review Required</span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="tab-content active" id="tab-overview">
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Monthly Revenue vs Budget Trend</h3>
+                            <span class="chart-tag">Commercial</span>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chart-revenue-trend"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Monthly Operating Expenses vs Budget</h3>
+                            <span class="chart-tag">Cost Control</span>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chart-expense-trend"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Departmental Variance Breakdown</h3>
+                            <span class="chart-tag">Favorable vs Unfavorable</span>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chart-dept-variance"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>P&L Statement Section Variance Waterfall</h3>
+                            <span class="chart-tag">Net Impact</span>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chart-section-waterfall"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-drilldown">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3>Hierarchical P&L Drill-Down Matrix</h3>
+                            <p>Interactive tree expansion: Department &rarr; Statement Section &rarr; Sub-Category &rarr; General Ledger Account</p>
+                        </div>
+                        <div class="panel-controls">
+                            <button class="btn-secondary" id="btn-expand-all">Expand All</button>
+                            <button class="btn-secondary" id="btn-collapse-all">Collapse All</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table tree-table" id="matrix-drilldown-table">
+                            <thead>
+                                <tr>
+                                    <th>Hierarchy Dimension</th>
+                                    <th>Actuals ($)</th>
+                                    <th>Budget ($)</th>
+                                    <th>Variance ($)</th>
+                                    <th>Variance (%)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matrix-drilldown-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-ytd-mom">
+                <div class="time-intel-grid">
+                    <div class="chart-container full-width">
+                        <div class="chart-header">
+                            <h3>Cumulative Year-to-Date (YTD) Performance Progression</h3>
+                            <span class="chart-tag">Time Intelligence</span>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="chart-ytd-cumulative"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card-panel full-width">
+                        <div class="panel-header">
+                            <div>
+                                <h3>Monthly & YTD Financial Trajectory Table</h3>
+                                <p>Month-over-Month (MoM) Growth, YTD Totals, and Cumulative Variances</p>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="table-time-intel">
+                                <thead>
+                                    <tr>
+                                        <th>Month Period</th>
+                                        <th>Actuals ($)</th>
+                                        <th>Budget ($)</th>
+                                        <th>Variance ($)</th>
+                                        <th>MoM Growth (%)</th>
+                                        <th>Actuals YTD ($)</th>
+                                        <th>Budget YTD ($)</th>
+                                        <th>Variance YTD (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="body-time-intel">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-exceptions">
+                <div class="card-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3>Variance Exception & Audit Log</h3>
+                            <p>Line items with absolute budget variance exceeding &plusmn;10% threshold requiring managerial commentary</p>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="table-exceptions">
+                            <thead>
+                                <tr>
+                                    <th>Period</th>
+                                    <th>Department</th>
+                                    <th>Account Number</th>
+                                    <th>Account Name</th>
+                                    <th>Section</th>
+                                    <th>Actuals ($)</th>
+                                    <th>Budget ($)</th>
+                                    <th>Variance ($)</th>
+                                    <th>Variance (%)</th>
+                                    <th>Audit Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="body-exceptions">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

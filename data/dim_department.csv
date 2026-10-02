@@ -1,0 +1,7 @@
+department_key,department_id,department_name,division,cost_center_code,head_of_department
+1,DEP-100,Executive & General,Corporate,CC-1000,Sarah Jenkins
+2,DEP-200,Sales & Distribution,Commercial,CC-2000,Michael Chang
+3,DEP-300,Marketing & Growth,Commercial,CC-3000,Elena Rostova
+4,DEP-400,Engineering & Technology,R&D,CC-4000,David Kim
+5,DEP-500,Customer Support & Success,Operations,CC-5000,Amina Patel
+6,DEP-600,Operations & Logistics,Operations,CC-6000,Robert Garcia

@@ -1,0 +1,16 @@
+account_key,account_number,account_name,account_category,sub_category,statement_section,normal_balance
+1,4010,Product Subscription Revenue,Revenue,Recurring Revenue,Revenue,Credit
+2,4020,Professional Services Revenue,Revenue,Services Revenue,Revenue,Credit
+3,4030,Enterprise License Revenue,Revenue,License Revenue,Revenue,Credit
+4,5010,Hosting & Cloud Infrastructure,Cost of Goods Sold,Direct Tech Costs,COGS,Debit
+5,5020,Direct Labor - Customer Support,Cost of Goods Sold,Direct Labor,COGS,Debit
+6,5030,Third-Party Merchant Fees,Cost of Goods Sold,Payment Processing,COGS,Debit
+7,6010,Salaries & Wages,Operating Expenses,Compensation,OPEX,Debit
+8,6020,Employee Benefits & Health,Operating Expenses,Compensation,OPEX,Debit
+9,6030,Digital Advertising & Paid Media,Operating Expenses,Marketing,OPEX,Debit
+10,6040,Events & Trade Shows,Operating Expenses,Marketing,OPEX,Debit
+11,6050,SaaS & Software Subscriptions,Operating Expenses,Technology,OPEX,Debit
+12,6060,Office Rent & Utilities,Operating Expenses,Facilities,OPEX,Debit
+13,6070,Travel & Entertainment,Operating Expenses,General Travel,OPEX,Debit
+14,6080,Legal & Professional Advisory,Operating Expenses,Advisory,OPEX,Debit
+15,6090,Recruiting & Talent Acquisition,Operating Expenses,Human Resources,OPEX,Debit
